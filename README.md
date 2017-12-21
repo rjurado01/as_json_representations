@@ -45,7 +45,7 @@ class User
     }
   end
 
-  representation :private, extend: :public do # you can extends other representations
+  representation :private, extend: :public do # you can extends another representations
     {
       age: age,
       city: city.as_json(representation: :basic)
