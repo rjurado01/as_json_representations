@@ -1,4 +1,6 @@
 # AsJsonRepresentations
+[![Gem Version](https://badge.fury.io/rb/as_json_representations.svg)](https://badge.fury.io/rb/as_json_representations)
+![Build Status](https://travis-ci.org/rjurado01/as_json_representations.svg?branch=master)
 
 Creates representations of your model data in a simple and clean way.
 
