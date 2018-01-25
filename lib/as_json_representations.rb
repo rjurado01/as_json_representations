@@ -31,7 +31,11 @@ module AsJsonRepresentations
     base.class_eval do
       eval %{
         def as_json(options={})
-          #{base}.render_representation(self, options)
+          if !options[:representation] && defined?(super)
+            super(options)
+          else
+            #{base}.render_representation(self, options)
+          end
         end
       }
     end

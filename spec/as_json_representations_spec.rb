@@ -3,7 +3,7 @@ RSpec.describe AsJsonRepresentations do
     expect(AsJsonRepresentations::VERSION).not_to be nil
   end
 
-  it 'render correctly representations' do
+  it 'renders correctly representations' do
     class User
       include AsJsonRepresentations
 
@@ -58,5 +58,44 @@ RSpec.describe AsJsonRepresentations do
     expect(
       user.as_json(representation: :private, date: '2017-12-21')
     ).to eq(full_name: 'John Doe', age: 30, date: '2017-12-21', city: {name: 'Madrid'})
+  end
+
+  context 'when class has as_json method' do
+    before :all do
+      module AsJsonDefault
+        def as_json(options=nil)
+          {dog_name: name, color: options[:color]}
+        end
+      end
+
+      class Dog
+        include AsJsonDefault
+        include AsJsonRepresentations
+
+        attr_accessor :name
+
+        def initialize(name)
+          @name = name
+        end
+
+        representation :basic do
+          {name: name}
+        end
+      end
+    end
+
+    context 'when use representation option' do
+      it 'renders representation' do
+        dog = Dog.new('bob')
+        expect(dog.as_json(representation: :basic)).to eq(name: 'bob')
+      end
+    end
+
+    context 'when do not use representation option' do
+      it 'calls super method' do
+        dog = Dog.new('bob')
+        expect(dog.as_json(color: 'dark')).to eq(dog_name: 'bob', color: 'dark')
+      end
+    end
   end
 end
