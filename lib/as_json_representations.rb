@@ -10,7 +10,8 @@ module AsJsonRepresentations
     end
 
     def render_representation(object, options)
-      return {} unless (representation = representations[options.delete :representation])
+      name_representation = options.delete(:representation)&.to_sym
+      return {} unless (representation = representations[name_representation])
 
       data = object.instance_exec(options, &representation[:block])
 
