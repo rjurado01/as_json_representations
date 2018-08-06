@@ -85,9 +85,14 @@ RSpec.describe AsJsonRepresentations do
     end
 
     context 'when use representation option' do
-      it 'renders representation' do
+      it 'renders representation with symbol' do
         dog = Dog.new('bob')
         expect(dog.as_json(representation: :basic)).to eq(name: 'bob')
+      end
+
+      it 'renders representation with string' do
+        dog = Dog.new('bob')
+        expect(dog.as_json(representation: 'basic')).to eq(name: 'bob')
       end
     end
 
