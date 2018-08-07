@@ -39,6 +39,10 @@ module AsJsonRepresentations
           end
         end
       }
+
+      def representation(name, options={})
+        as_json(options.merge(representation: name))
+      end
     end
   end
 end

@@ -76,7 +76,11 @@ end
 
 city = City.new('Madrid')
 user = User.new('John', 'Doe', 30, city)
+
 user.as_json(representation: :private, date: '2017-12-21')
+# {:full_name=>"John Doe", :date=>"2017-12-21", :age=>30, :city=>{:name=>"Madrid"}}
+
+user.representation(:private, date: '2017-12-21') # short form
 # {:full_name=>"John Doe", :date=>"2017-12-21", :age=>30, :city=>{:name=>"Madrid"}}
 ```
 
