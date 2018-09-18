@@ -117,4 +117,57 @@ RSpec.describe AsJsonRepresentations do
       end
     end
   end
+
+  context 'when use into module with inheritance' do
+    before :all do
+      module ParentRepresentations
+        include AsJsonRepresentations
+
+        representation :a do {name: name} end
+        representation :b do {name: name} end
+        representation :c do {name: name} end
+      end
+
+      module ChildRepresentations
+        include ParentRepresentations
+
+        representation :a do {color: color} end
+
+        representation :b, extend: true do
+          {color: color}
+        end
+      end
+
+      class Parent
+        include ParentRepresentations
+
+        attr_accessor :name
+
+        def initialize(name)
+          @name = name
+        end
+      end
+
+      class Child < Parent
+        include ChildRepresentations
+
+        attr_accessor :color
+
+        def initialize(name, color)
+          @name = name
+          @color = color
+        end
+      end
+    end
+
+    it 'renders representation' do
+      parent = Parent.new('parent')
+      expect(parent.as_json(representation: :a)).to eq(name: 'parent') # overwritten
+
+      child = Child.new('child', 'red')
+      expect(child.as_json(representation: :a)).to eq(color: 'red') # overwritten
+      expect(child.as_json(representation: :b)).to eq(name: 'child', color: 'red') # extended
+      expect(child.as_json(representation: :c)).to eq(name: 'child') # parent
+    end
+  end
 end
