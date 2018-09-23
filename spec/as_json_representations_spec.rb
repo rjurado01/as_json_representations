@@ -77,6 +77,12 @@ RSpec.describe AsJsonRepresentations do
         expect(@user.representation(:private, date: '2017-12-21')).to eq(@result)
       end
     end
+
+    context 'when use representation method with an array' do
+      it 'renders correctly representations' do
+        expect([@user].representation(:private, date: '2017-12-21')).to eq([@result])
+      end
+    end
   end
 
   context 'when class has as_json method' do

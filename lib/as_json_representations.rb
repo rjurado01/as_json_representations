@@ -1,3 +1,5 @@
+require 'as_json_representations/collection.rb'
+
 module AsJsonRepresentations
   module ClassMethods
     def representation(name, options={}, &block)
@@ -58,4 +60,14 @@ module AsJsonRepresentations
       end
     end
   end
+end
+
+Array.include(AsJsonRepresentations::Collection)
+
+if defined?(Mongoid::Criteria)
+  Mongoid::Criteria.include(AsJsonRepresentations::Collection)
+end
+
+if defined?(ActiveRecord::Relation)
+  ActiveRecord::Relation.include(AsJsonRepresentations::Collection)
 end
