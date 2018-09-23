@@ -84,6 +84,60 @@ user.representation(:private, date: '2017-12-21') # short form
 # {:full_name=>"John Doe", :date=>"2017-12-21", :age=>30, :city=>{:name=>"Madrid"}}
 ```
 
+## Modules Inheritance
+
+You can include a module representation into other module like this example:
+
+```ruby
+module ParentRepresentations
+  include AsJsonRepresentations
+
+  representation :a do {name: name} end
+  representation :b do {name: name} end
+  representation :c do {name: name} end
+end
+
+module ChildRepresentations
+  include ParentRepresentations
+
+  representation :a do # overwrite
+    {color: color}
+  end
+
+  representation :b, extend: true do # extend parent representation with same name
+    {color: color}
+  end
+
+  representation :d, extend: :c do # extend parent representation
+    {color: color}
+  end
+end
+
+class Child
+  include ChildRepresentations
+
+  attr_accessor :color
+
+  def initialize(name, color)
+    @name = name
+    @color = color
+  end
+end
+
+child = Child.new('child', 'red')
+child.as_json(representation: :a) # {color: 'red'}
+child.as_json(representation: :b) # {name: 'child', color: 'red'}
+child.as_json(representation: :c) # {name: 'child'}
+child.as_json(representation: :d) # {name: 'child', color: 'red'}
+```
+
+When you includes representation module (parent) into other module (child):
+
+* Parent representations are included
+* If a representation is redefined, it is overwritten
+* You can extend parent representations
+* You must use `extend: true` when use the same name
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
