@@ -4,11 +4,15 @@ module AsJsonRepresentations
   module ClassMethods
     def representation(name, options={}, &block)
       @representations ||= {}
-      @representations[name] = options.merge(name: name, block: block)
+      @representations[name] = options.merge(name: name, class: self, block: block)
     end
 
     def representations
       @representations
+    end
+
+    def parent
+      @parent
     end
 
     def find_representation(name)
@@ -26,9 +30,12 @@ module AsJsonRepresentations
           &representation[:block]
         ).merge(data)
 
-        representation = [representation[:name], true].include?(representation[:extend]) ?
-          @parent.find_representation(representation[:name]) :
-          find_representation(representation[:extend])
+        representation =
+          if representation[:extend] == true
+            representation[:class].parent&.find_representation(representation[:name])
+          else
+            find_representation(representation[:extend])
+          end
 
         return data unless representation
       end
