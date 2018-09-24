@@ -144,6 +144,14 @@ RSpec.describe AsJsonRepresentations do
         end
       end
 
+      module GrandChildRepresentations
+        include ChildRepresentations
+
+        representation :b, extend: true do
+          {aux: true}
+        end
+      end
+
       class Parent
         include ParentRepresentations
 
@@ -164,16 +172,26 @@ RSpec.describe AsJsonRepresentations do
           @color = color
         end
       end
+
+      class GrandChild < Child
+        include GrandChildRepresentations
+      end
     end
 
     it 'renders representation' do
+      # first level
       parent = Parent.new('parent')
       expect(parent.as_json(representation: :a)).to eq(name: 'parent') # overwritten
 
+      # second level
       child = Child.new('child', 'red')
       expect(child.as_json(representation: :a)).to eq(color: 'red') # overwritten
       expect(child.as_json(representation: :b)).to eq(name: 'child', color: 'red') # extended
       expect(child.as_json(representation: :c)).to eq(name: 'child') # parent
+
+      # third level
+      gchild = GrandChild.new('gchild', 'blue')
+      expect(gchild.as_json(representation: :b)).to eq(name: 'gchild', color: 'blue', aux: true)
     end
   end
 end
