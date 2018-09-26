@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    as_json_representations (0.4.1)
+    as_json_representations (0.4.2)
 
 GEM
   remote: https://rubygems.org/
