@@ -11,12 +11,12 @@ module AsJsonRepresentations
       @representations
     end
 
-    def parent
-      @parent
+    def parent_entity
+      @parent_entity
     end
 
     def find_representation(name)
-      representations[name] || @parent&.find_representation(name) if name
+      representations[name] || @parent_entity&.find_representation(name) if name
     end
 
     def render_representation(object, options)
@@ -32,7 +32,7 @@ module AsJsonRepresentations
 
         representation =
           if representation[:extend] == true
-            representation[:class].parent&.find_representation(representation[:name])
+            representation[:class].parent_entity&.find_representation(representation[:name])
           else
             find_representation(representation[:extend])
           end
@@ -63,7 +63,7 @@ module AsJsonRepresentations
       def self.included(base)
         return unless base.class == Module
         AsJsonRepresentations.send(:included, base)
-        base.instance_variable_set :@parent, self
+        base.instance_variable_set :@parent_entity, self
       end
     end
   end
