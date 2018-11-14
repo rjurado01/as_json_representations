@@ -5,6 +5,16 @@ module AsJsonRepresentations
     def representation(name, options={}, &block)
       @representations ||= {}
       @representations[name] = options.merge(name: name, class: self, block: block)
+
+      # copy parent representation options that should be inherited
+      return unless parent_entity && options[:extend]
+      parent_representation_name = options[:extend] == true ? name : options[:extend]
+      parent_representation = parent_entity.representations[parent_representation_name]
+
+      [:includes].each do |option|
+        next unless (parent_option = parent_representation[option])
+        @representations[name][option] = (options[option] || []) + parent_option
+      end
     end
 
     def representations
@@ -61,9 +71,13 @@ module AsJsonRepresentations
       end
 
       def self.included(base)
-        return unless base.class == Module
-        AsJsonRepresentations.send(:included, base)
-        base.instance_variable_set :@parent_entity, self
+        if base.class == Module
+          AsJsonRepresentations.send(:included, base)
+          base.instance_variable_set :@parent_entity, self
+        else
+          context = self
+          base.define_singleton_method(:representations) { context.representations }
+        end
       end
     end
   end

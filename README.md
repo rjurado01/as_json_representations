@@ -138,6 +138,23 @@ When you includes representation module (parent) into other module (child):
 * You can extend parent representations
 * You must use `extend: true` when use the same name
 
+## ActiveRecord collection options
+
+You can use this ActiveRecord option when you define a representation:
+
+* [includes](https://apidock.com/rails/ActiveRecord/QueryMethods/includes)
+
+```
+representation :private, includes: [:city]
+  {
+    age: age,
+    city: city.as_json(representation: :basic)
+  }
+end
+```
+
+This options will be used on the collection before to serializing it automatically.
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
