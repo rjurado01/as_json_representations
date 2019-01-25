@@ -1,5 +1,23 @@
-require "bundler/setup"
-require "as_json_representations"
+require 'bundler/setup'
+require 'as_json_representations'
+require 'active_support'
+require 'active_record'
+
+db_config = YAML.safe_load(File.open("#{__dir__}/support/database_sqlite.yml"))
+
+ActiveRecord::Base.establish_connection(db_config['test'])
+
+ActiveRecord::Base.connection.create_table(:cities, force: true) do |t|
+  t.string :name
+  t.string :type
+end
+
+ActiveRecord::Base.connection.create_table(:users, force: true) do |t|
+  t.string :first_name
+  t.string :last_name
+  t.integer :age
+  t.references :city
+end
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

@@ -1,4 +1,5 @@
 require 'as_json_representations/collection.rb'
+require 'active_support'
 
 module AsJsonRepresentations
   module ClassMethods
@@ -8,11 +9,13 @@ module AsJsonRepresentations
 
       # copy parent representation options that should be inherited
       return unless parent_entity && options[:extend]
+
       parent_representation_name = options[:extend] == true ? name : options[:extend]
       parent_representation = parent_entity.representations[parent_representation_name]
 
       [:includes].each do |option|
         next unless (parent_option = parent_representation[option])
+
         @representations[name][option] = (options[option] || []) + parent_option
       end
     end
@@ -89,6 +92,9 @@ if defined?(Mongoid::Criteria)
   Mongoid::Criteria.include(AsJsonRepresentations::Collection)
 end
 
-if defined?(ActiveRecord::Relation)
-  ActiveRecord::Relation.include(AsJsonRepresentations::Collection)
+ActiveSupport.on_load :active_record do
+  if defined?(ActiveRecord::Relation)
+    ActiveRecord::Relation.include(AsJsonRepresentations::Collection)
+    Array.include(AsJsonRepresentations::Collection)
+  end
 end
