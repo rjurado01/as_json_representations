@@ -5,10 +5,17 @@ RSpec.describe AsJsonRepresentations do
 
   context 'when use into basic class' do
     before :all do
-      class User < ActiveRecord::Base
+      class User
         include AsJsonRepresentations
 
-        belongs_to :city
+        attr_accessor :first_name, :last_name, :age, :city
+
+        def initialize(first_name, last_name, age, city)
+          @first_name = first_name
+          @last_name = last_name
+          @age = age
+          @city = city
+        end
 
         representation :public do |options| # you can pass options
           {
@@ -37,50 +44,175 @@ RSpec.describe AsJsonRepresentations do
         end
       end
 
-      module City2Representations
+      class City
         include CityRepresentations
-        representation :basic, extend: true do
-          {
-            status: status
-          }
+
+        attr_accessor :name
+
+        def initialize(name)
+          @name = name
         end
       end
 
-      class City < ActiveRecord::Base
-        include CityRepresentations
-
-        has_many :user
-      end
-      class City2 < City
-        include City2Representations
-
-        def status
-          "statu2s"
-        end
-      end
-
-      @city = City.create(name: 'Madrid')
-      @city = City2.create(name: 'Madrid2')
-      @user = User.create(first_name: 'John', last_name: 'Doe', age: 30, city: @city)
+      @city = City.new('Madrid')
+      @user = User.new('John', 'Doe', 30, @city)
       @result = {full_name: 'John Doe', age: 30, date: '2017-12-21', city: {name: 'Madrid'}}
     end
 
-    context 'when representation is called' do
-      it 'doesn\'t work' do
-        data = City.all.as_json(representation: :basic)
+    context 'when use as_json method' do
+      context 'when pass representation as symbol' do
+        it 'renders correctly representations' do
+          expect(@user.as_json(representation: :private, date: '2017-12-21')).to eq(@result)
+        end
+      end
 
-        expect(data[0]).to eq(name: 'Madrid')
-        expect(data[1]).to eq(name: 'Madrid2', status: 'statu2s')
+      context 'when pass representation as string' do
+        it 'renders correctly representations' do
+          expect(@user.as_json(representation: 'private', date: '2017-12-21')).to eq(@result)
+        end
       end
     end
 
-    context 'when representation is called' do
-      it 'doesn\'t work' do
-        data = City.all.representation(:basic)
-
-        expect(data[0]).to eq(name: 'Madrid')
-        expect(data[1]).to eq(name: 'Madrid2', status: 'statu2s')
+    context 'when use representation method' do
+      it 'renders correctly representations' do
+        expect(@user.representation(:private, date: '2017-12-21')).to eq(@result)
       end
+    end
+
+    context 'when use representation method with an array' do
+      it 'renders correctly representations' do
+        query = [@user]
+        allow(query).to receive(:includes).and_return(query)
+        expect(query).to receive(:includes).with([:city])
+        expect(query.representation(:private, date: '2017-12-21')).to eq([@result])
+      end
+    end
+  end
+
+  context 'when class has as_json method' do
+    before :all do
+      module AsJsonDefault
+        def as_json(options=nil)
+          {dog_name: name, color: options[:color]}
+        end
+      end
+
+      class Dog
+        include AsJsonDefault
+        include AsJsonRepresentations
+
+        attr_accessor :name
+
+        def initialize(name)
+          @name = name
+        end
+
+        representation :basic do
+          {name: name}
+        end
+      end
+    end
+
+    context 'when use representation option' do
+      it 'renders representation' do
+        dog = Dog.new('bob')
+        expect(dog.as_json(representation: :basic)).to eq(name: 'bob')
+      end
+    end
+
+    context 'when do not use representation option' do
+      it 'calls super method' do
+        dog = Dog.new('bob')
+        expect(dog.as_json(color: 'dark')).to eq(dog_name: 'bob', color: 'dark')
+      end
+    end
+  end
+
+  context 'when use into module with inheritance' do
+    before :all do
+      module ParentRepresentations
+        include AsJsonRepresentations
+
+        representation :a do
+          {name: name}
+        end
+
+        representation :basic, includes: [:test2, :test3] do
+          {name: name}
+        end
+
+        representation :advanced, extend: :basic, includes: [:test] do
+          {name2: name}
+        end
+      end
+
+      # module ChildRepresentations
+      #   include ParentRepresentations
+
+      #   representation :a do
+      #     {color: color}
+      #   end
+
+      #   representation :advanced2, extend: :basic, includes: [:test] do
+      #     {color: color}
+      #   end
+      # end
+
+      # module GrandChildRepresentations
+      #   include ChildRepresentations
+
+      #   representation :complete, extend: :advanded, includes: [:test2] do
+      #     {aux: true}
+      #   end
+      # end
+
+      class Parent
+        include ParentRepresentations
+
+        attr_accessor :name
+
+        def initialize(name)
+          @name = name
+        end
+      end
+
+      # class Child < Parent
+      #   include ChildRepresentations
+
+      #   attr_accessor :color
+
+      #   def initialize(name, color)
+      #     @name = name
+      #     @color = color
+      #   end
+      # end
+
+      # class GrandChild < Child
+      #   include GrandChildRepresentations
+      # end
+    end
+
+    it 'renders representation' do
+      # first level
+      parent = Parent.new('parent')
+      expect(parent.as_json(representation: :a)).to eq(name: 'parent') # overwritten
+
+      # second level
+      child = Child.new('child', 'red')
+      expect(child.as_json(representation: :a)).to eq(color: 'red') # overwritten
+      expect(child.as_json(representation: :b)).to eq(name: 'child', color: 'red') # extended
+      expect(child.as_json(representation: :c)).to eq(name: 'child') # parent
+
+      # third level
+      gchild = GrandChild.new('gchild', 'blue')
+      expect(gchild.as_json(representation: :b)).to eq(name: 'gchild', color: 'blue', aux: true)
+    end
+
+    it 'uses includes with collection' do
+      query = [Parent.new('gchild')]
+      allow(query).to receive(:includes).and_return(query)
+      expect(query).to receive(:includes).with(%i[test test2])
+      query.representation(:advanced)
     end
   end
 end

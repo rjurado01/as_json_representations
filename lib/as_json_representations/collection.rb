@@ -14,8 +14,23 @@ module AsJsonRepresentations
           [:includes].each do |method|
             next unless respond_to? method
 
-            args = first&.class&.representations&.dig(options[:representation], method)
-            subject = subject.public_send(method, args) if args
+            representation = first&.class&.representations&.dig(options[:representation])
+            args = []
+
+            current = representation
+            loop do
+              break if current.nil?
+
+              args += current[method] if current[method].present?
+
+              break if current[method].nil? || current[:extend].nil?
+
+              current = first&.class&.representations&.dig(current[:extend])
+            end
+
+            args.each do |arg|
+              subject = subject.public_send(method, arg)
+            end
           end
 
           return super if respond_to? :super
