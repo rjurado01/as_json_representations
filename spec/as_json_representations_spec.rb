@@ -37,7 +37,7 @@ RSpec.describe AsJsonRepresentations do
       module CityRepresentations
         include AsJsonRepresentations
 
-        representation :basic, includes: [:uno, :dos] do
+        representation :basic do
           {
             name: name
           }
@@ -83,7 +83,7 @@ RSpec.describe AsJsonRepresentations do
       it 'renders correctly representations' do
         query = [@user]
         allow(query).to receive(:includes).and_return(query)
-        expect(query).to receive(:includes).with([:city])
+        expect(query).to receive(:includes).with(:city)
         expect(query.representation(:private, date: '2017-12-21')).to eq([@result])
       end
     end
@@ -137,34 +137,34 @@ RSpec.describe AsJsonRepresentations do
           {name: name}
         end
 
-        representation :basic, includes: [:test2, :test3] do
+        representation :b, includes: %i[test2 test3] do
           {name: name}
         end
 
-        representation :advanced, extend: :basic, includes: [:test] do
-          {name2: name}
+        representation :c, extend: :basic, includes: %i[test] do
+          {name: name}
         end
       end
 
-      # module ChildRepresentations
-      #   include ParentRepresentations
+      module ChildRepresentations
+        include ParentRepresentations
 
-      #   representation :a do
-      #     {color: color}
-      #   end
+        representation :a do
+          {color: color}
+        end
 
-      #   representation :advanced2, extend: :basic, includes: [:test] do
-      #     {color: color}
-      #   end
-      # end
+        representation :b, extend: true, includes: %i[test] do
+          {color: color}
+        end
+      end
 
-      # module GrandChildRepresentations
-      #   include ChildRepresentations
+      module GrandChildRepresentations
+        include ChildRepresentations
 
-      #   representation :complete, extend: :advanded, includes: [:test2] do
-      #     {aux: true}
-      #   end
-      # end
+        representation :b, extend: true do
+          {aux: true}
+        end
+      end
 
       class Parent
         include ParentRepresentations
@@ -176,20 +176,20 @@ RSpec.describe AsJsonRepresentations do
         end
       end
 
-      # class Child < Parent
-      #   include ChildRepresentations
+      class Child < Parent
+        include ChildRepresentations
 
-      #   attr_accessor :color
+        attr_accessor :color
 
-      #   def initialize(name, color)
-      #     @name = name
-      #     @color = color
-      #   end
-      # end
+        def initialize(name, color)
+          @name = name
+          @color = color
+        end
+      end
 
-      # class GrandChild < Child
-      #   include GrandChildRepresentations
-      # end
+      class GrandChild < Child
+        include GrandChildRepresentations
+      end
     end
 
     it 'renders representation' do
@@ -211,8 +211,15 @@ RSpec.describe AsJsonRepresentations do
     it 'uses includes with collection' do
       query = [Parent.new('gchild')]
       allow(query).to receive(:includes).and_return(query)
-      expect(query).to receive(:includes).with(%i[test test2])
-      query.representation(:advanced)
+      expect(query).to receive(:includes).with(:test2).with(:test3)
+      query.representation(:b)
+    end
+
+    it 'uses includes with inheritance' do
+      query = [Child.new('gchild', 'blue')]
+      allow(query).to receive(:includes).and_return(query)
+      expect(query).to receive(:includes).with(:test).with(:test2).with(:test3)
+      query.representation(:b)
     end
   end
 end
