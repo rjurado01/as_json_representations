@@ -14,7 +14,7 @@ module AsJsonRepresentations
           [:includes].each do |method|
             next unless respond_to? method
 
-            representation = first&.class&.representations&.dig(options[:representation])
+            representation = subject.model.representations&.dig(options[:representation])
             args = []
 
             current = representation
