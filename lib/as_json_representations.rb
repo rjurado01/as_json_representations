@@ -61,7 +61,7 @@ module AsJsonRepresentations
           if !options[:representation] && defined?(super)
             super(options)
           else
-            #{base}.render_representation(self, options)
+            #{base}.render_representation(self, options.dup)
           end
         end
       }

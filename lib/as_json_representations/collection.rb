@@ -11,7 +11,7 @@ module AsJsonRepresentations
           [:includes].each do |method|
             next unless respond_to? method
 
-            args = first.class.representations.dig(options[:representation], method)
+            args = klass.representations.dig(options[:representation], method)
             public_send(method, args) if args
           end
 

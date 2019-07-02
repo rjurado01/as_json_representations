@@ -83,6 +83,7 @@ RSpec.describe AsJsonRepresentations do
       it 'renders correctly representations' do
         query = [@user]
         allow(query).to receive(:includes).and_return(query)
+        allow(query).to receive(:klass).and_return(query.first.class)
         expect(query).to receive(:includes).with([:city])
         expect(query.representation(:private, date: '2017-12-21')).to eq([@result])
       end
@@ -211,6 +212,7 @@ RSpec.describe AsJsonRepresentations do
     it 'uses includes with collection' do
       query = [GrandChild.new('gchild', 'green')]
       allow(query).to receive(:includes).and_return(query)
+      allow(query).to receive(:klass).and_return(query.first.class)
       expect(query).to receive(:includes).with([:test])
       query.representation(:b)
     end
