@@ -73,7 +73,7 @@ RSpec.describe AsJsonRepresentations do
       end
     end
 
-    context 'when use representation method' do
+    context 'when use representation method with object' do
       it 'renders correctly representations' do
         expect(@user.representation(:private, date: '2017-12-21')).to eq(@result)
       end
@@ -82,9 +82,23 @@ RSpec.describe AsJsonRepresentations do
     context 'when use representation method with an array' do
       it 'renders correctly representations' do
         query = [@user]
+
         allow(query).to receive(:includes).and_return(query)
         allow(query).to receive(:klass).and_return(query.first.class)
         expect(query).to receive(:includes).with([:city])
+        expect(query.representation(:private, date: '2017-12-21')).to eq([@result])
+      end
+    end
+
+    context 'when use representation method with ActiveRecord::Relation' do
+      it 'renders correctly representations' do
+        query = [@user]
+        includes_query = query.dup # when active records calls :includes returns new query
+
+        allow(query).to receive(:includes).and_return(includes_query)
+        allow(query).to receive(:klass).and_return(query.first.class)
+        expect(query).to receive(:includes).with([:city])
+        expect(includes_query).to receive(:map).and_call_original
         expect(query.representation(:private, date: '2017-12-21')).to eq([@result])
       end
     end
