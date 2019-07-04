@@ -7,13 +7,13 @@ module AsJsonRepresentations
       @representations[name] = options.merge(name: name, class: self, block: block)
 
       # copy parent representation options that should be inherited
-      return unless parent_entity && options[:extend]
-      parent_representation_name = options[:extend] == true ? name : options[:extend]
-      parent_representation = parent_entity.representations[parent_representation_name]
+      return unless options[:extend]
+      extend_representation_name = options[:extend] == true ? name : options[:extend]
+      extend_representation = (parent_entity || self).representations[extend_representation_name]
 
       [:includes].each do |option|
-        next unless (parent_option = parent_representation[option])
-        @representations[name][option] = (options[option] || []) + parent_option
+        next unless (extend_option_value = extend_representation[option])
+        @representations[name][option] = extend_option_value + (options[option] || [])
       end
     end
 
