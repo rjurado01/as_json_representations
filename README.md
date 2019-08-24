@@ -4,6 +4,18 @@
 
 Creates representations of your model data in a simple and clean way.
 
+## Features
+
+* Easy to use
+* Easy to define representations
+* Support representations hinheritance
+* Support module definition
+* Support options
+* Support ActiveRecord collection options
+* Faster
+
+The performance of this gem is up to **7x higher** than other for a simple class instance serialization: [test](https://github.com/rjurado01/as_json_representations_benchmarks)
+
 ## Installation
 
 Add this line to your application's Gemfile:
