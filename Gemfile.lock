@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    as_json_representations (0.4.3)
+    as_json_representations (0.5.0)
 
 GEM
   remote: https://rubygems.org/
@@ -32,4 +32,4 @@ DEPENDENCIES
   rspec (~> 3.0)
 
 BUNDLED WITH
-   1.16.4
+   1.17.2
