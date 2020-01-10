@@ -1,6 +1,6 @@
 RSpec.describe 'QueryMethods' do
   describe '#includes' do
-    context 'when use module reprsentation' do
+    context 'when use module representation' do
       before :all do
         module ChildRepresentations
           include AsJsonRepresentations
@@ -37,7 +37,7 @@ RSpec.describe 'QueryMethods' do
       end
     end
 
-    context 'when use module reprsentation with extend' do
+    context 'when use module representation with extend' do
       before :all do
         module ChildRepresentations
           include AsJsonRepresentations

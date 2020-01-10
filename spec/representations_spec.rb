@@ -1,3 +1,5 @@
+require 'byebug'
+
 RSpec.describe 'Representation' do
   describe 'when use into basic class' do
     before :all do
@@ -240,6 +242,24 @@ RSpec.describe 'Representation' do
       # third level
       gchild = GrandChild.new('gchild', 'blue')
       expect(gchild.as_json(representation: :b)).to eq(name: 'gchild', color: 'blue', aux: true)
+    end
+  end
+
+  context 'when check collection' do
+    context 'when query has not klass method' do
+      it 'returns super' do
+        expect([].as_json).to eq([])
+      end
+    end
+
+    context 'when query klass has not representation method' do
+      it 'returns super' do
+        query = []
+
+        allow(query).to receive(:includes).and_return(query)
+        allow(query).to receive(:klass).and_return(query)
+        expect(query.as_json).to eq([])
+      end
     end
   end
 end

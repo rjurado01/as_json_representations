@@ -1,4 +1,5 @@
 require 'bundler/setup'
+require 'byebug'
 require 'as_json_representations'
 
 RSpec.configure do |config|
