@@ -1,208 +1,114 @@
 RSpec.describe 'QueryMethods' do
-  describe '#includes' do
-    context 'when use module representation' do
+  AsJsonRepresentations::QUERY_METHODS.each do |query_method|
+    describe "#{query_method}" do
       before :all do
-        module ChildRepresentations
-          include AsJsonRepresentations
-
-          representation(:a, includes: [:one]) { {} }
-        end
-
-        class Child
-          include ChildRepresentations
-        end
+        QUERY_METHOD = query_method
       end
 
       after :all do
-        [Child, ChildRepresentations].each { |x| Object.send(:remove_const, x.to_s) }
+        Object.send(:remove_const, 'QUERY_METHOD')
       end
 
-      let(:query) { [Child.new] }
+      context 'when use module representation' do
+        before :all do
+          module ChildRepresentations
+            include AsJsonRepresentations
 
-      it 'uses includes correcly' do
-        allow(query).to receive(:includes).and_return(query)
-        allow(query).to receive(:klass).and_return(query.first.class)
-        expect(query).to receive(:includes).with([:one])
-        query.as_json(representation: :a)
-      end
+            representation(:a, QUERY_METHOD => [:one]) { {} }
+          end
 
-      it 'works when includes returns new query (ActiveRecord::Relation)' do
-        includes_query = query.dup # simulate returns new query when calls include
-        allow(query).to receive(:includes).and_return(includes_query)
-
-        allow(query).to receive(:klass).and_return(query.first.class)
-        expect(query).to receive(:includes).with([:one])
-        expect(includes_query).to receive(:map).and_call_original
-        query.as_json(representation: :a)
-      end
-    end
-
-    context 'when use module representation with extend' do
-      before :all do
-        module ChildRepresentations
-          include AsJsonRepresentations
-
-          representation(:a, includes: [:one]) { {} }
-          representation(:b, extend: :a, includes: [:two]) { {} }
+          class Child
+            include ChildRepresentations
+          end
         end
 
-        class Child
-          include ChildRepresentations
-        end
-      end
-
-      after :all do
-        [Child, ChildRepresentations].each { |x| Object.send(:remove_const, x.to_s) }
-      end
-
-      it 'uses includes correcly' do
-        child = Child.new
-        query = [child]
-
-        allow(query).to receive(:includes).and_return(query)
-        allow(query).to receive(:klass).and_return(query.first.class)
-        expect(query).to receive(:includes).with(%i[one two])
-        query.as_json(representation: :b)
-      end
-    end
-
-    context 'when use module reprsentation with extend and inheritance' do
-      before :all do
-        module ParentRepresentations
-          include AsJsonRepresentations
-
-          representation(:a, includes: [:one]) { {} }
+        after :all do
+          [Child, ChildRepresentations].each { |x| Object.send(:remove_const, x.to_s) }
         end
 
-        module ChildRepresentations
-          include ParentRepresentations
+        let(:query) { [Child.new] }
 
-          representation(:a, extend: true, includes: [:two]) { {} }
+        it "uses #{query_method} correcly" do
+          allow(query).to receive(query_method).and_return(query)
+          allow(query).to receive(:klass).and_return(query.first.class)
+          expect(query).to receive(query_method).with([:one])
+          query.as_json(representation: :a)
         end
 
-        class Child
-          include ChildRepresentations
+        it "works when #{query_method} returns new query (ActiveRecord::Relation)" do
+          query_method_query = query.dup # simulate returns new query when calls include
+          allow(query).to receive(query_method).and_return(query_method_query)
+
+          allow(query).to receive(:klass).and_return(query.first.class)
+          expect(query).to receive(query_method).with([:one])
+          expect(query_method_query).to receive(:map).and_call_original
+          query.as_json(representation: :a)
         end
       end
 
-      after :all do
-        [
-          Child, ChildRepresentations, ParentRepresentations
-        ].each { |x| Object.send(:remove_const, x.to_s) }
-      end
+      context 'when use module representation with extend' do
+        before :all do
+          module ChildRepresentations
+            include AsJsonRepresentations
 
-      it 'uses includes correcly' do
-        child = Child.new
-        query = [child]
+            representation(:a, QUERY_METHOD => [:one]) { {} }
+            representation(:b, extend: :a, QUERY_METHOD => [:two]) { {} }
+          end
 
-        allow(query).to receive(:includes).and_return(query)
-        allow(query).to receive(:klass).and_return(query.first.class)
-        expect(query).to receive(:includes).with(%i[one two])
-        query.as_json(representation: :a)
-      end
-    end
-  end
-
-  describe '#eager_load' do
-    context 'when use module reprsentation' do
-      before :all do
-        module ChildRepresentations
-          include AsJsonRepresentations
-
-          representation(:a, eager_load: [:one]) { {} }
+          class Child
+            include ChildRepresentations
+          end
         end
 
-        class Child
-          include ChildRepresentations
+        after :all do
+          [Child, ChildRepresentations].each { |x| Object.send(:remove_const, x.to_s) }
+        end
+
+        it "uses #{query_method} correcly" do
+          child = Child.new
+          query = [child]
+
+          allow(query).to receive(query_method).and_return(query)
+          allow(query).to receive(:klass).and_return(query.first.class)
+          expect(query).to receive(query_method).with(%i[one two])
+          query.as_json(representation: :b)
         end
       end
 
-      after :all do
-        [Child, ChildRepresentations].each { |x| Object.send(:remove_const, x.to_s) }
-      end
+      context 'when use module reprsentation with extend and inheritance' do
+        before :all do
+          module ParentRepresentations
+            include AsJsonRepresentations
 
-      let(:query) { [Child.new] }
+            representation(:a, QUERY_METHOD => [:one]) { {} }
+          end
 
-      it 'uses eager_load correcly' do
-        allow(query).to receive(:eager_load).and_return(query)
-        allow(query).to receive(:klass).and_return(query.first.class)
-        expect(query).to receive(:eager_load).with([:one])
-        query.as_json(representation: :a)
-      end
+          module ChildRepresentations
+            include ParentRepresentations
 
-      it 'works when eager_load returns new query (ActiveRecord::Relation)' do
-        eager_load_query = query.dup # simulate returns new query when calls include
-        allow(query).to receive(:eager_load).and_return(eager_load_query)
+            representation(:a, extend: true, QUERY_METHOD => [:two]) { {} }
+          end
 
-        allow(query).to receive(:klass).and_return(query.first.class)
-        expect(query).to receive(:eager_load).with([:one])
-        expect(eager_load_query).to receive(:map).and_call_original
-        query.as_json(representation: :a)
-      end
-    end
-
-    context 'when use module reprsentation with extend' do
-      before :all do
-        module ChildRepresentations
-          include AsJsonRepresentations
-
-          representation(:a, eager_load: [:one]) { {} }
-          representation(:b, extend: :a, eager_load: [:two]) { {} }
+          class Child
+            include ChildRepresentations
+          end
         end
 
-        class Child
-          include ChildRepresentations
-        end
-      end
-
-      after :all do
-        [Child, ChildRepresentations].each { |x| Object.send(:remove_const, x.to_s) }
-      end
-
-      it 'uses eager_load correcly' do
-        child = Child.new
-        query = [child]
-
-        allow(query).to receive(:eager_load).and_return(query)
-        allow(query).to receive(:klass).and_return(query.first.class)
-        expect(query).to receive(:eager_load).with(%i[one two])
-        query.as_json(representation: :b)
-      end
-    end
-
-    context 'when use module reprsentation with extend and inheritance' do
-      before :all do
-        module ParentRepresentations
-          include AsJsonRepresentations
-
-          representation(:a, eager_load: [:one]) { {} }
+        after :all do
+          [
+            Child, ChildRepresentations, ParentRepresentations
+          ].each { |x| Object.send(:remove_const, x.to_s) }
         end
 
-        module ChildRepresentations
-          include ParentRepresentations
+        it "uses #{query_method} correcly" do
+          child = Child.new
+          query = [child]
 
-          representation(:a, extend: true, eager_load: [:two]) { {} }
+          allow(query).to receive(query_method).and_return(query)
+          allow(query).to receive(:klass).and_return(query.first.class)
+          expect(query).to receive(query_method).with(%i[one two])
+          query.as_json(representation: :a)
         end
-
-        class Child
-          include ChildRepresentations
-        end
-      end
-
-      after :all do
-        [
-          Child, ChildRepresentations, ParentRepresentations
-        ].each { |x| Object.send(:remove_const, x.to_s) }
-      end
-
-      it 'uses eager_load correcly' do
-        child = Child.new
-        query = [child]
-
-        allow(query).to receive(:eager_load).and_return(query)
-        allow(query).to receive(:klass).and_return(query.first.class)
-        expect(query).to receive(:eager_load).with(%i[one two])
-        query.as_json(representation: :a)
       end
     end
   end

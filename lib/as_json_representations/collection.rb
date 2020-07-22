@@ -11,7 +11,7 @@ module AsJsonRepresentations
 
           if respond_to?(:klass) && klass.respond_to?(:representations)
             # call supported methods of ActiveRecord::QueryMethods
-            %i[includes eager_load].each do |method|
+            QUERY_METHODS.each do |method|
               next unless respond_to? method
 
               args = klass.representations.dig(options[:representation], method)
