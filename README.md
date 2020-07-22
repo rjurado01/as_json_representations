@@ -155,6 +155,8 @@ When you includes representation module (parent) into other module (child):
 You can use this ActiveRecord option when you define a representation:
 
 * [includes](https://apidock.com/rails/ActiveRecord/QueryMethods/includes)
+* [eager_load](https://apidock.com/rails/ActiveRecord/QueryMethods/eager_load)
+* [preload](https://apidock.com/rails/ActiveRecord/QueryMethods/preload)
 
 ```
 representation :private, includes: [:city]
