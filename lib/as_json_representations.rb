@@ -1,7 +1,7 @@
 require 'as_json_representations/collection.rb'
 
 module AsJsonRepresentations
-  QUERY_METHODS = %i[includes eager_load preload].freeze
+  QUERY_METHODS = %i[includes eager_load preload select].freeze
 
   module ClassMethods
     def representation(name, options={}, &block)

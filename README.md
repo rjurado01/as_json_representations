@@ -157,6 +157,7 @@ You can use this ActiveRecord option when you define a representation:
 * [includes](https://apidock.com/rails/ActiveRecord/QueryMethods/includes)
 * [eager_load](https://apidock.com/rails/ActiveRecord/QueryMethods/eager_load)
 * [preload](https://apidock.com/rails/ActiveRecord/QueryMethods/preload)
+* [select](https://apidock.com/rails/ActiveRecord/QueryMethods/select)
 
 ```
 representation :private, includes: [:city]
