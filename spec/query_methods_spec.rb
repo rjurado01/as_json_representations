@@ -110,6 +110,34 @@ RSpec.describe 'QueryMethods' do
           query.as_json(representation: :a)
         end
       end
+
+      next unless query_method == :select
+
+      context 'when representation extends from another without this query option' do
+        before :all do
+          module ParentRepresentations
+            include AsJsonRepresentations
+
+            representation(:a) { {} }
+          end
+        end
+
+        after :all do
+          [
+            ParentRepresentations
+          ].each { |x| Object.send(:remove_const, x.to_s) }
+        end
+
+        it 'raises exception' do
+          expect do
+            Module.new do
+              include ParentRepresentations
+
+              representation(:a, extend: true, QUERY_METHOD => [:two]) { {} }
+            end
+          end.to raise_error AsJsonRepresentations::InvalidSelectQueryMethodUse
+        end
+      end
     end
   end
 end

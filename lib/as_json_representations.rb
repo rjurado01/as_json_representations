@@ -1,6 +1,8 @@
 require 'as_json_representations/collection.rb'
 
 module AsJsonRepresentations
+  InvalidSelectQueryMethodUse = Class.new(StandardError)
+
   QUERY_METHODS = %i[includes eager_load preload select].freeze
 
   module ClassMethods
@@ -12,6 +14,11 @@ module AsJsonRepresentations
       return unless options[:extend]
       extend_representation_name = options[:extend] == true ? name : options[:extend]
       extend_representation = (parent_entity || self).representations[extend_representation_name]
+
+      # 'select' query method need that all extended representation use it also
+      if options[:select] && !extend_representation[:select]
+        raise InvalidSelectQueryMethodUse, "Extended representation without 'select'"
+      end
 
       QUERY_METHODS.each do |option|
         next unless (extend_option_value = extend_representation[option])
