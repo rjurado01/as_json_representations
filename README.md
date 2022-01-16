@@ -94,6 +94,9 @@ user.as_json(representation: :private, date: '2017-12-21')
 
 user.representation(:private, date: '2017-12-21') # short form
 # {:full_name=>"John Doe", :date=>"2017-12-21", :age=>30, :city=>{:name=>"Madrid"}}
+
+user.representation(%i[basis public], date: '2017-12-21') # multiple representations
+# {:name => "John", :full_name=>"John Doe", :date=>"2017-12-21"}
 ```
 
 ## Modules Inheritance

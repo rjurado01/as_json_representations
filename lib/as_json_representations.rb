@@ -32,25 +32,31 @@ module AsJsonRepresentations
     end
 
     def render_representation(object, options)
-      representation_name = options.delete(:representation)&.to_sym
-      return {} unless (representation = find_representation(representation_name))
+      items = options.delete(:representation)
+      items = items.is_a?(Array) ? items : [items]
 
-      data = {}
-      loop do
-        data = object.instance_exec(
-          options,
-          &representation[:block]
-        ).merge(data)
+      items.map do |representation_name|
+        return {} unless (representation = find_representation(representation_name.to_sym))
 
-        representation =
-          if representation[:extend] == true
-            representation[:class].parent_entity&.find_representation(representation[:name])
-          else
-            find_representation(representation[:extend])
-          end
+        data = {}
+        loop do
+          data = object.instance_exec(
+            options,
+            &representation[:block]
+          ).merge(data)
 
-        return data unless representation
-      end
+          representation =
+            if representation[:extend] == true
+              representation[:class].parent_entity&.find_representation(representation[:name])
+            else
+              find_representation(representation[:extend])
+            end
+
+          break unless representation
+        end
+
+        data
+      end.inject(:merge)
     end
   end
 
