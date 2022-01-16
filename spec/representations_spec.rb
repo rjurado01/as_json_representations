@@ -1,5 +1,3 @@
-require 'byebug'
-
 RSpec.describe 'Representation' do
   describe 'when use into basic class' do
     before :all do
@@ -77,6 +75,14 @@ RSpec.describe 'Representation' do
 
       it 'renders correctly when use :repersentation alias' do
         expect(@user.representation(:public)).to eq(result)
+      end
+    end
+
+    context 'when use multiple representations' do
+      let(:result) { {full_name: 'John Doe', date: nil, city: {:name=>"Madrid"}} }
+
+      it 'renders correctly with representation as symbol' do
+        expect(@user.as_json(representation: %i[public city])).to eq(result)
       end
     end
 
