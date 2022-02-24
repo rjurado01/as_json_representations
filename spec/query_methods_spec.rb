@@ -42,7 +42,7 @@ RSpec.describe 'QueryMethods' do
           allow(query).to receive(:klass).and_return(query.first.class)
           expect(query).to receive(query_method).with([:one])
           expect(query_method_query).to receive(:map).and_call_original
-          query.as_json(representation: :a)
+          query.as_json(representation: 'a') # support string as representation name
         end
       end
 

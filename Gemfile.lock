@@ -28,10 +28,10 @@ PLATFORMS
 
 DEPENDENCIES
   as_json_representations!
-  bundler (~> 1.15)
+  bundler (~> 2.3)
   byebug
   rake (~> 13.0)
   rspec (~> 3.0)
 
 BUNDLED WITH
-   1.17.3
+   2.3.8
